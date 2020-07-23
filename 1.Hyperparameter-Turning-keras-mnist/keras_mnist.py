@@ -113,8 +113,8 @@ class LogRunMetrics(Callback):
     # callback at the end of every epoch
     def on_epoch_end(self, epoch, log):
         # log a value repeated which creates a list
-        run.log('Loss', log['loss'])
-        run.log('Accuracy', log['acc'])
+        run.log('Loss', log['val_loss'])
+        run.log('Accuracy', log['val_accuracy'])
 
 history = model.fit(X_train, y_train,
                     batch_size=batch_size,
@@ -134,8 +134,8 @@ print('Test accuracy:', score[1])
 
 plt.figure(figsize=(6, 3))
 plt.title('MNIST with Keras MLP ({} epochs)'.format(n_epochs), fontsize=14)
-plt.plot(history.history['acc'], 'b-', label='Accuracy', lw=4, alpha=0.5)
-plt.plot(history.history['loss'], 'r--', label='Loss', lw=4, alpha=0.5)
+plt.plot(history.history['val_accuracy'], 'b-', label='Accuracy', lw=4, alpha=0.5)
+plt.plot(history.history['val_loss'], 'r--', label='Loss', lw=4, alpha=0.5)
 plt.legend(fontsize=12)
 plt.grid(True)
 
