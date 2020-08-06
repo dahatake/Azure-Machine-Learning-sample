@@ -22,7 +22,7 @@ Azure Machine Learning services の  Hyperparameters Turning を使ったサン�
 
 | ファイル名                               | 内容 |
 | ---------------------------------------- | ----------------- |
-| [学習ジョブ実行](train-hyperparameter-tune-deploy-with-keras.ipynb)  | Azure Machine Learning Services SDK を利用し、kerasの学習ジョブを実行。HyperParameterを手動設定のものと、HyperDrive を利用したものがある              | 
+| [train-hyperparameter-tune-deploy-with-keras.ipynb](train-hyperparameter-tune-deploy-with-keras.ipynb)  | Azure Machine Learning Services SDK を利用し、kerasの学習ジョブを実行。HyperParameterを手動設定のものと、HyperDrive を利用したものがある              | 
 | [keras_mnist.py](keras_mnist.py) | keras-TensorFlow の学習実行スクリプト |   
 | [utils.py](utils.py) | Utility スクリプト   |  
 

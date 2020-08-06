@@ -30,6 +30,7 @@ https://github.com/Azure/MachineLearningNotebooks/tree/master/how-to-use-azureml
 | [auto-ml-classification-text-dnn.ipynb](auto-ml-classification-text-dnn.ipynb)  | AutoML の実行部分              | 
 | [helper.py](helper.py) | ツール的なスクリプト |   
 | [infer.py](infer.py) | 推論用 スクリプト   |  
+| [requirement.txt](requirement.txt) | ローカルでの Azure ML SDK環境実行のための pip -r 参照用ファイル |
 
 ## 参考
 
