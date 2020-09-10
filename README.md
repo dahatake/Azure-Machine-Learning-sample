@@ -55,6 +55,14 @@ Azure Machine Learning services の  Hyperparameters Turning を使ったサン�
 
 その中でも、テキスト・文字列 のデータがあった際に Featurization Embedding を BiLSTMあるいは 'BERT'を使って行ってくれる機能があります。
 
+
+# 4. Deploy AutoML model to Azure Functions (Preview)
+
+ - [AML-AzureFunctionsPackager.ipynb]4.AML-Functions-notebook/README.md)
+
+`Azure Functions` にDocker Container 化をしてデプロイするサンプルです。
+
+
 ## 参考
 
 Azure Machine Learning Services ドキュメント:

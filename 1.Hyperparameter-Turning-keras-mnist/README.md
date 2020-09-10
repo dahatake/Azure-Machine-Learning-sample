@@ -1,6 +1,6 @@
 # HyperParamter Turning sample
 
-Azure Machine Learning services の  Hyperparameters Turning を使ったサンプル。 `HyperDrive` は、`Automated Machine Learning` の機能と切り離して利用ができます。執筆時点 (2019/7/3) 時点だと、Automated Machine Learning は、Deep Learning には使えないため、単独のサンプルとして。
+Azure Machine Learning の Hyperparameters Turning を使ったサンプル。 `HyperDrive` は、`Automated Machine Learning` の機能と切り離して利用ができます。執筆時点 (2019/7/3) 時点だと、Automated Machine Learning は、Deep Learning には使えないため、単独のサンプルとして。
 
   - MNIST
   - Keras + Tensorflow
