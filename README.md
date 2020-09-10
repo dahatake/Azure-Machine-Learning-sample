@@ -49,7 +49,7 @@ Azure Machine Learning services の  Hyperparameters Turning を使ったサン�
 
 # 3. Text classification using AutoML with BERT featurization in Japanese
 
- - [auto-ml-classification-text-dnn.ipynb]3.classification-text-dnn-jpn/README.md)
+ - [auto-ml-classification-text-dnn.ipynb](3.classification-text-dnn-jpn/README.md)
 
 `AutoML` は Modelの学習における feature engineering, Hyper-parameter Turning, Job management などをまとめて行ってくれる機能になります。
 
@@ -58,7 +58,7 @@ Azure Machine Learning services の  Hyperparameters Turning を使ったサン�
 
 # 4. Deploy AutoML model to Azure Functions (Preview)
 
- - [AML-AzureFunctionsPackager.ipynb]4.AML-Functions-notebook/README.md)
+ - [AML-AzureFunctionsPackager.ipynb](4.AML-Functions-notebook/README.md)
 
 `Azure Functions` にDocker Container 化をしてデプロイするサンプルです。
 
