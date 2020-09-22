@@ -6,7 +6,7 @@
 Azure Macine Learning services サンプルコード:
 https://docs.microsoft.com/ja-jp/azure/machine-learning/service/samples-notebooks
 
-## 事前準備
+# 事前準備
 
 1. Azure の Subscription を作成
 
@@ -18,7 +18,8 @@ Azure Machine Learning services を利用するために必要です。
 
 Jupyter Notebook で、[0.config.ipynb](0.config.ipynb) を実行します。
 
-### 背景
+# 背景
+
 Azure の Subscriptionを作成後、執筆時点 (2019/10/07)では、このコードから Workspace を作成してください。Azure Portal から Workspace を作成すると、CPU / GPU のデフォルトの `AmlCompute` が設定されないため、幾つかのサンプルコードが動作しないためです。勿論、作成した AmlCompute 名を直接クエリすれば、動作します。
 
 参考: Azure Machine Learning service ワークスペースを作成する:
@@ -60,7 +61,13 @@ Azure Machine Learning services の  Hyperparameters Turning を使ったサン�
 
  - [AML-AzureFunctionsPackager.ipynb](4.AML-Functions-notebook/README.md)
 
-`Azure Functions` にDocker Container 化をしてデプロイするサンプルです。
+`Azure Functions` に Azure Machine Learning で管理されているモデルを Docker Container 化をしてデプロイするサンプルです。
+
+# 5. REST API Client for AutoML Model deployment via Portal to ACI
+
+ - [Program.cs](5.C#-REST-API-Client-For-AutoML-GUI-Deploy-To-ACI/README.md)
+
+`Auto ML` を使って作成し、ACIに展開したモデル。それを、C#から呼び出すサンプルです。
 
 
 ## 参考

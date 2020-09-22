@@ -1,0 +1,29 @@
+POST http://<your ACI URL>.azurecontainer.io/score
+Content-Type: application/json
+Authorization: Bearer <your key>
+
+{
+  "data": [
+    {
+      "age": 24,
+      "job": "technician",
+      "marital": "single",
+      "education": "university.degree",
+      "default": "no",
+      "housing": "no",
+      "loan": "yes",
+      "contact": "cellular",
+      "month": "jul",
+      "duration": 109,
+      "campaign": 3,
+      "pdays": 999,
+      "previous": 0,
+      "poutcome": "nonexistent",
+      "emp.var.rate": 1.4,
+      "cons.price.idx": 93.918,
+      "cons.conf.idx": -42.7,
+      "euribor3m": 4.963,
+      "nr.employed": 5228.1
+    }
+  ]
+}
