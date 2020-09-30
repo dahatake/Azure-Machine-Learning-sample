@@ -22,8 +22,8 @@ Azure Machine Learning の AutoMLを使って作成したモデルを、コー�
 
 | ファイル名                               | 内容 |
 | ---------------------------------------- | ----------------- |
-| [Program.cs](Program.cs)  | Visual Studio Code の .NET Core で作成したコンソールアプリケーションタイプの REST Client のサンプル | 
-| [aci.http](aci.http) | Visual Studio Code のREST Client で直ぐに使えるHTTP Postの文字列 |   
+| [Program.cs](WebAPIClient/Program.cs)  | Visual Studio Code の .NET Core で作成したコンソールアプリケーションタイプの REST Client のサンプル | 
+| [aci.http](WebAPIClient/aci.http) | Visual Studio Code のREST Client で直ぐに使えるHTTP Postの文字列 |   
 
 # 参考
 

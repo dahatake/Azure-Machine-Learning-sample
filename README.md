@@ -68,7 +68,7 @@ https://docs.microsoft.com/ja-jp/azure/machine-learning/service/samples-notebook
     `Auto ML` を使って作成し、ACIに展開したモデル。それを、C#から呼び出すサンプルです。
 
 
-# 参考
+## 参考
 
 Azure Machine Learning Services ドキュメント:
 

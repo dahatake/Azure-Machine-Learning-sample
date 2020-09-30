@@ -3,8 +3,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Dynamic;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace WebAPIClient
 {
@@ -44,8 +46,8 @@ namespace WebAPIClient
                 var responseBodyClearnuped = responseBody.Replace("\"{", "{").Replace("\"}", "}").Replace("}\"", "}").Replace("\\\"","\"");
 
                 // JSON オブジェクト作成
-                dynamic responseBodyJOSN  = JsonConvert.DeserializeObject(responseBodyClearnuped);
-                result = responseBodyJOSN?.result[0];
+                dynamic responseBodyJSON  = JsonConvert.DeserializeObject<ExpandoObject>(responseBodyClearnuped, new ExpandoObjectConverter());
+                result = responseBodyJSON?.result[0];
 
             } else {
                 result = $"Error: {response.ReasonPhrase} \r {responseBody}"; 
