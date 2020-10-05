@@ -67,6 +67,12 @@ https://docs.microsoft.com/ja-jp/azure/machine-learning/service/samples-notebook
 
     `Auto ML` を使って作成し、ACIに展開したモデル。それを、C#から呼び出すサンプルです。
 
+# 6. AutoML GUI deploy Probability
+
+ - [scoring_file_v_1_0_0.py](6.AutoML-Probability/README.md)
+
+    `Auto ML` を使って作成し、ACIに展開する際に、Probability (確度)の数字を出力するサンプルです。
+
 
 ## 参考
 
