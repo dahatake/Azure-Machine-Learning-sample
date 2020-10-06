@@ -46,12 +46,14 @@ def init():
 @output_schema(NumpyParameterType(output_sample))
 def run(data):
     try:
-        # result = model.predict(data)
         result_predict = model.predict(data)
+        result_class_name = model.classes_
         result_predict_proba = model.predict_proba(data)
 
-        d = {"predict": result_predict[0], "score": result_predict_proba[0][0]}
-        return json.dumps({"result": d})
+        result_with_score = pd.DataFrame(result_predict_proba, columns=result_class_name).to_json(orient='records')
+        result = "{\"result\": \"%s\", \"score:\": %s}" % (result_predict[0],result_with_score)
+
+        return result
 
     except Exception as e:
         result = str(e)
