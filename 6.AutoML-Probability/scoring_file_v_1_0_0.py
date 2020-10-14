@@ -51,7 +51,7 @@ def run(data):
         result_predict_proba = model.predict_proba(data)
 
         result_with_score = pd.DataFrame(result_predict_proba, columns=result_class_name).to_json(orient='records')
-        result = "{\"result\": \"%s\", \"score:\": %s}" % (result_predict[0],result_with_score)
+        result = (("{\"result\": \"%s\", \"score:\": %s}" % (result_predict[0],result_with_score)).encode('ascii', 'ignore')).decode("utf-8")
 
         return result
 
