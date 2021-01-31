@@ -1,0 +1,19 @@
+name: azureml-pl-dev
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - python=3.6
+  - matplotlib
+  - jedi==0.17.1
+  - jupyterlab
+  - pip
+  - pip:
+    - tornado==6.1.0
+    - azureml
+    - azureml-core
+    - azureml-sdk
+    - azureml-widgets
+    - torch
+    - torchvision
+    - pytorch-lightning
