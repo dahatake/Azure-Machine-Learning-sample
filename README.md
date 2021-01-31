@@ -73,7 +73,7 @@ https://docs.microsoft.com/ja-jp/azure/machine-learning/service/samples-notebook
 
     `Auto ML` を使って作成し、ACIに展開する際に、Probability (確度)の数字を出力するサンプルです。
 
-# 17 HyperParameter Turning by HyperDrive using PyTorch Lightning
+# 7. HyperParameter Turning by HyperDrive using PyTorch Lightning
 
  - [ImageClassification-hyperparameterTune-PyTorchLightning.ipynb](7.ImageClassification-HyperparameterTurning-PyTorchLightning/README.md)
 
