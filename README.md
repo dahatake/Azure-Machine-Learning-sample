@@ -10,7 +10,7 @@ https://docs.microsoft.com/ja-jp/azure/machine-learning/service/samples-notebook
 
 1. Azure の Subscription を作成
 
-    Azure Machine Learning services を利用するために必要です。
+    Azure Machine Learning を利用するために必要です。
 
     無料トライアル: https://azure.microsoft.com/ja-jp/free/
 
@@ -32,11 +32,11 @@ https://docs.microsoft.com/ja-jp/azure/machine-learning/service/samples-notebook
 
     https://docs.microsoft.com/ja-jp/azure/machine-learning/service/how-to-manage-workspace#download-a-configuration-file
 
-# 1. HyperParameter Turning by HyperDrive
+# 1. MNIST HyperParameter Turning by HyperDrive using Keras with TensorFlow
 
  - [train-hyperparameter-tune-deploy-with-keras.ipynb](1.Hyperparameter-Turning-keras-mnist/README.md)
 
-    Azure Machine Learning services の  Hyperparameters Turning を使ったサンプル。 `HyperDrive` は、`Automated Machine Learning` の機能と切り離して利用ができます。執筆時点 (2019/7/3) 時点だと、Automated Machine Learning は、Deep Learning には使えないため、単独のサンプルとして。
+    Azure Machine Learning の  Hyperparameters Turning を使ったサンプル。 `HyperDrive` は、`Automated Machine Learning` の機能と切り離して利用ができます。執筆時点 (2019/7/3) 時点だと、Automated Machine Learning は、Deep Learning には使えないため、単独のサンプルとして。
 
 # 2. Keras to ONNX for WindowsML
 
@@ -73,6 +73,11 @@ https://docs.microsoft.com/ja-jp/azure/machine-learning/service/samples-notebook
 
     `Auto ML` を使って作成し、ACIに展開する際に、Probability (確度)の数字を出力するサンプルです。
 
+# 17 HyperParameter Turning by HyperDrive using PyTorch Lightning
+
+ - [ImageClassification-hyperparameterTune-PyTorchLightning.ipynb](7.ImageClassification-HyperparameterTurning-PyTorchLightning/README.md)
+
+    Azure Machine Learning の  Hyperparameters Turning を使ったサンプル。PyTorch Lightning での Image Classification。Fine Tuning/Transfer Learning 前提で。
 
 ## 参考
 
