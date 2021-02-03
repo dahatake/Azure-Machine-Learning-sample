@@ -17,6 +17,8 @@ import torchvision.models as models
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 
+#from pytorch_lightning.metrics import ConfusionMatrix
+
 from azureml.core import Run
 
 print("PyTorch version:", torch.__version__)
@@ -24,46 +26,8 @@ print("TorchVision version:", torchvision.__version__)
 print("PyTorch Lightning Vision version:", pl.__version__)
 
 # ------------
-# args
+# model
 # ------------
-torch.manual_seed(0)
-pl.seed_everything(0)
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--data-folder', type=str, dest='data_folder', help='data folder mounting point')
-parser.add_argument('--batch-size', type=int, dest='batch_size', default=50, help='mini batch size for training')
-parser.add_argument('--epoch', type=int, dest='epoch', default=10, help='epoch size for training')
-parser.add_argument('--learning-rate', type=float, dest='learning_rate', default=0.001, help='learning rate')
-parser.add_argument('--momentum', type=float, dest='momentum', default=0.9, help='momentum')
-parser.add_argument('--model-name', type=str, dest='model_name', default='resnet', help='Fine Turning model name')
-parser.add_argument('--optimizer', type=str, dest='optimizer', default='SGD', help='Optimzers to use for training.')
-parser.add_argument('--criterion', type=str, dest='criterion', default='cross_entropy', help='Loss Function to use for training.')
-parser.add_argument('--gpus', type=int, dest='gpus', default=1, help='The count of GPU')
-parser.add_argument('--feature_extract', type=bool, dest='feature_extract', default=True, help='Flag for feature extracting. When False, we finetune the whole model, when True we only update the reshaped layer params')
-
-args = parser.parse_args()
-
-args.num_workers=8
-
-data_folder = args.data_folder
-print('training dataset is stored here:', data_folder)
-print('GPUs: ', args.gpus)
-
-input_size = 224
-if args.model_name == "inception":
-    input_size = 299
-# ---------------------------
-# Azure Machnie Learning
-# 1) get Azure ML run context and log hyperparameters
-run = Run.get_context()
-run.log('model_name', args.model_name)
-run.log('optimizer', args.optimizer)
-run.log('criterion', args.criterion)
-
-run.log('lr', np.float(args.learning_rate))
-run.log('momentum', np.float(args.momentum))
-# ---------------------------
-
 
 def set_parameter_requires_grad(model):
     for param in model.parameters():
@@ -145,44 +109,11 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
 
     return model_ft, input_size
 
-# ------------
-# data
-# ------------
-transform = transforms.Compose([
-                # Augmentation
-#                transforms.RandomHorizontalFlip(),
-#                transforms.RandomVerticalFlip(),
-                transforms.RandomAffine(degrees=[-10, 10], translate=(0.1, 0.1), scale=(0.5, 1.5)),
-                transforms.RandomRotation(degrees=10),
-                # Resize
-                transforms.Resize(int(input_size * 1.3)),
-                transforms.CenterCrop(input_size),
-                # Tensor
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
-])
 
-dataset = torchvision.datasets.ImageFolder(args.data_folder, transform)
-args.num_classes = len(dataset.classes)
-
-n_train = int(len(dataset) * 0.7)
-n_val = int(len(dataset) * 0.15)
-n_test = len(dataset) - n_train - n_val
-
-train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(dataset, [n_train, n_val, n_test])
-
-train_loader = torch.utils.data.DataLoader(train_dataset, args.batch_size, shuffle=True, drop_last=True, num_workers=args.num_workers)
-val_loader = torch.utils.data.DataLoader(val_dataset, args.batch_size, num_workers=args.num_workers)
-test_loader = torch.utils.data.DataLoader(test_dataset, args.batch_size)
-
-# ------------
-# model
-# ------------
 class FineTurningModel(pl.LightningModule):
 
     def __init__(self, hparams, model):
         super().__init__()
-        
         self.hparams = hparams
         self.model = model
 
@@ -190,7 +121,11 @@ class FineTurningModel(pl.LightningModule):
         self.train_acc = pl.metrics.Accuracy()
         self.val_acc = pl.metrics.Accuracy()
         self.test_acc = pl.metrics.Accuracy()
-       
+
+        self.val_confusion = pl.metrics.classification.ConfusionMatrix(num_classes=self.hparams.num_classes)
+
+        print('self.device:', self.device)
+    
     def forward(self, x):
         h = self.model(x)
         return h
@@ -216,9 +151,11 @@ class FineTurningModel(pl.LightningModule):
         # ---------------------------
         # Azure Machnie Learning
         # 2) send log a value repeated which creates a list
+        # ---------------------------
+        run = Run.get_context()
         run.log('Loss', np.float(loss))
         run.log('Accuracy', np.float(self.train_acc(outputs, labels)))
-        # ---------------------------
+
         return loss
     
     def validation_step(self, batch, batch_idx):
@@ -227,18 +164,58 @@ class FineTurningModel(pl.LightningModule):
         outputs = self(inputs)
         loss = self.configure_criterion(outputs, labels)
 
-        self.log('val_loss', loss, on_step=False, on_epoch=True)
-        self.log('val_acc', self.val_acc(outputs, labels), on_step=False, on_epoch=True)
+        sync_dist = False
+        num_gpu = torch.cuda.device_count()
+        if num_gpu > 1:
+            sync_dist=True # only for Single Machine
+
+        self.log('val_loss', loss, on_step=True, on_epoch=True, sync_dist=sync_dist)
+        self.log('val_acc', self.val_acc(outputs, labels), on_step=True, on_epoch=True, sync_dist=sync_dist)
+
+        log_probs = self.forward(inputs)
+        self.val_confusion.update(log_probs, labels)
 
         return loss
+
+#    def validation_epoch_end(self, outputs):
+        # ------------
+        # Log confusion matrix
+        # ------------
+        # TODO: InProgress
+
+#        conf_mat = self.val_confusion.compute().detach().cpu().numpy().astype(np.int).tolist()
+
+        # ---------------------------
+        # Azure Machnie Learning
+        # 2) send log a value repeated which creates a list
+        # https://docs.microsoft.com/ja-jp/python/api/azureml-core/azureml.core.run%28class%29?preserve-view=true&view=azure-ml-py#log-confusion-matrix-name--value--description----
+        # ---------------------------
+
+#        confmat_json = {
+#            "schema_type": "confusion_matrix",
+#            "schema_version": "v1",
+#            "data": {
+#                "class_labels": self.hparams.num_classes,
+#                "matrix": conf_mat}
+#        }
+
+#        run = Run.get_context()
+#        run.log_confusion_matrix('Confusion Matrix', confmat_json)
 
     def test_step(self, batch, batch_idx):
 
         inputs, labels = batch
         outputs = self(inputs)
         loss = self.configure_criterion(outputs, labels)
-        self.log('test_loss', loss, on_step=False, on_epoch=True)
-        self.log('test_acc', self.test_acc(outputs, labels), on_step=False, on_epoch=True)
+
+        sync_dist = False
+        num_gpu = torch.cuda.device_count()
+        if num_gpu > 1:
+            sync_dist=True # only for Single Machine
+
+
+        self.log('test_loss', loss, on_step=True, on_epoch=True, sync_dist=sync_dist)
+        self.log('test_acc', self.test_acc(outputs, labels), on_step=True, on_epoch=True, sync_dist=sync_dist)
 
         return loss
 
@@ -307,38 +284,121 @@ class FineTurningModel(pl.LightningModule):
             criterion = F.soft_margin_loss(y, t)
 
         return criterion
+    
 
+def main():
 
-# Initialize the model for this run
-model_ft, input_size = initialize_model(args.model_name, args.num_classes, feature_extract=args.feature_extract , use_pretrained=True)
+    # ------------
+    # args
+    # ------------
+    torch.manual_seed(0)
+    pl.seed_everything(0)
 
-model = FineTurningModel(args, model_ft)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data-folder', type=str, dest='data_folder', help='data folder mounting point')
+    parser.add_argument('--batch-size', type=int, dest='batch_size', default=50, help='mini batch size for training')
+    parser.add_argument('--epoch', type=int, dest='epoch', default=10, help='epoch size for training')
+    parser.add_argument('--learning-rate', type=float, dest='learning_rate', default=0.001, help='learning rate')
+    parser.add_argument('--momentum', type=float, dest='momentum', default=0.9, help='momentum')
+    parser.add_argument('--model-name', type=str, dest='model_name', default='resnet', help='Fine Turning model name')
+    parser.add_argument('--optimizer', type=str, dest='optimizer', default='SGD', help='Optimzers to use for training.')
+    parser.add_argument('--criterion', type=str, dest='criterion', default='cross_entropy', help='Loss Function to use for training.')
+    parser.add_argument('--feature_extract', type=bool, dest='feature_extract', default=True, help='Flag for feature extracting. When False, we finetune the whole model, when True we only update the reshaped layer params')
 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-print('device:', device)
-model = model.to(device)
+    args = parser.parse_args()
 
-if torch.cuda.device_count() > 1:
-    model = nn.DataParallel(model)
-    print('use Multiple GPU.')
+    args.num_workers=8
 
-# ------------
-# training
-# ------------
-trainer = pl.Trainer(max_epochs=args.epoch, gpus=args.gpus)
-trainer.fit(model, train_loader, val_loader)
+    data_folder = args.data_folder
+    print('training dataset is stored here:', data_folder)
 
-# ------------
-# Test (Not Validation)
-# ------------
-test_result = trainer.test(test_dataloaders=test_loader)
-test_result
+    input_size = 224
+    if args.model_name == "inception":
+        input_size = 299
+    # ---------------------------
+    # Azure Machnie Learning
+    # 1) get Azure ML run context and log hyperparameters
+    # ---------------------------
+    run = Run.get_context()
+    run.log('model_name', args.model_name)
+    run.log('optimizer', args.optimizer)
+    run.log('criterion', args.criterion)
 
-# ------------
-# save model
-# ------------
-# TODO: Done -- Comment out for job performance
-outputdir = './outputs/model'
-os.makedirs(outputdir, exist_ok=True)
-torch.save(model.state_dict(), os.path.join(outputdir, 'model.dict'))
-torch.save(model, os.path.join(outputdir, 'model.pt'))
+    run.log('lr', np.float(args.learning_rate))
+    run.log('momentum', np.float(args.momentum))
+
+    # For your tagging
+#    run.tag('description', 'xxx')
+
+    # ------------
+    # data
+    # ------------
+    ## Todo: Split them to Train and Val for data augumentation
+
+    transform = transforms.Compose([
+                    # Augmentation
+    #                transforms.RandomHorizontalFlip(),
+    #                transforms.RandomVerticalFlip(),
+                    transforms.RandomAffine(degrees=[-10, 10], translate=(0.1, 0.1), scale=(0.5, 1.5)),
+                    transforms.RandomRotation(degrees=10),
+                    # Resize
+                    transforms.Resize(int(input_size * 1.3)),
+                    transforms.CenterCrop(input_size),
+                    # Tensor
+                    transforms.ToTensor(),
+                    transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
+    ]
+    )
+
+    dataset = torchvision.datasets.ImageFolder(args.data_folder, transform)
+    args.num_classes = len(dataset.classes)
+
+    n_train = int(len(dataset) * 0.7)
+    n_val = int(len(dataset) * 0.15)
+    n_test = len(dataset) - n_train - n_val
+
+    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(dataset, [n_train, n_val, n_test])
+
+    train_loader = torch.utils.data.DataLoader(train_dataset, args.batch_size, shuffle=True, drop_last=True, num_workers=args.num_workers)
+    val_loader = torch.utils.data.DataLoader(val_dataset, args.batch_size, num_workers=args.num_workers)
+    test_loader = torch.utils.data.DataLoader(test_dataset, args.batch_size)
+
+    # Initialize the model for this run
+    model_ft, input_size = initialize_model(args.model_name, args.num_classes, feature_extract=args.feature_extract , use_pretrained=True)
+    model = FineTurningModel(args, model_ft)
+
+    # GPU Configuration
+    num_gpu = torch.cuda.device_count()
+    print('num_gpu:', num_gpu)
+
+    accelerator = None
+    if num_gpu > 1:
+        accelerator='ddp' # only for Single Machine
+
+    # ------------
+    # training
+    # ------------
+    trainer = pl.Trainer(max_epochs=args.epoch, gpus=num_gpu, accelerator=accelerator)
+    trainer.fit(model, train_loader, val_loader)
+
+    # ------------
+    # Test (Not Validation)
+    # ------------
+    test_result = trainer.test(test_dataloaders=test_loader)
+    test_result
+
+    run.log('test_acc', [res["test_acc"] for res in test_result][0])
+    run.log('test_loss', [res["test_loss"] for res in test_result][0])
+    run.log('test_acc_epoch', [res["test_acc_epoch"] for res in test_result][0])
+    run.log('test_loss_epoch', [res["test_loss_epoch"] for res in test_result][0])
+
+    # ------------
+    # save model
+    # ------------
+    outputdir = './outputs/model'
+    os.makedirs(outputdir, exist_ok=True)
+    torch.save(model.state_dict(), os.path.join(outputdir, 'model.dict'))
+    torch.save(model, os.path.join(outputdir, 'model.pt'))
+
+if __name__ == '__main__':
+    main()
