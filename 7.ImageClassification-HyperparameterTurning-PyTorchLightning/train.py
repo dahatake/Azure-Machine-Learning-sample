@@ -177,31 +177,6 @@ class FineTurningModel(pl.LightningModule):
 
         return loss
 
-#    def validation_epoch_end(self, outputs):
-        # ------------
-        # Log confusion matrix
-        # ------------
-        # TODO: InProgress
-
-#        conf_mat = self.val_confusion.compute().detach().cpu().numpy().astype(np.int).tolist()
-
-        # ---------------------------
-        # Azure Machnie Learning
-        # 2) send log a value repeated which creates a list
-        # https://docs.microsoft.com/ja-jp/python/api/azureml-core/azureml.core.run%28class%29?preserve-view=true&view=azure-ml-py#log-confusion-matrix-name--value--description----
-        # ---------------------------
-
-#        confmat_json = {
-#            "schema_type": "confusion_matrix",
-#            "schema_version": "v1",
-#            "data": {
-#                "class_labels": self.hparams.num_classes,
-#                "matrix": conf_mat}
-#        }
-
-#        run = Run.get_context()
-#        run.log_confusion_matrix('Confusion Matrix', confmat_json)
-
     def test_step(self, batch, batch_idx):
 
         inputs, labels = batch
@@ -212,7 +187,6 @@ class FineTurningModel(pl.LightningModule):
         num_gpu = torch.cuda.device_count()
         if num_gpu > 1:
             sync_dist=True # only for Single Machine
-
 
         self.log('test_loss', loss, on_step=True, on_epoch=True, sync_dist=sync_dist)
         self.log('test_acc', self.test_acc(outputs, labels), on_step=True, on_epoch=True, sync_dist=sync_dist)
@@ -333,7 +307,6 @@ def main():
     # ------------
     # data
     # ------------
-    ## Todo: Split them to Train and Val for data augumentation
 
     transform = transforms.Compose([
                     # Augmentation
